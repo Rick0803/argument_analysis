@@ -1,0 +1,69 @@
+---
+title: "n-grams and frequency pattern mining"
+author: "Ruike Xu"
+date: "2023-04-15"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#install.packages("tidytext")
+#install.packages("janeaustenr")
+```
+
+```{r}
+library(dplyr)
+library(tidytext)
+library(janeaustenr)
+```
+
+```{r}
+aggregated <- read.csv('aggregated.csv')
+```
+
+```{r}
+argument_quality_data <- aggregated %>% select('Argument', 'CO', 'EF', 'RE', 'OV')
+```
+
+
+# n-gram analysis for high cogency arguments
+
+```{r}
+argument_bigrams_CO <- as_tibble(argument_quality_data[argument_quality_data$CO == 3, ]) %>% unnest_tokens(bigram, Argument, token = "ngrams", n=2) %>% filter(!is.na(bigram))
+```
+
+
+```{r}
+argument_bigrams_CO %>% count(bigram, sort = TRUE)
+```
+
+```{r}
+library(tidyr)
+
+bigrams_separated_CO <- argument_bigrams_CO %>%
+  separate(bigram, c("word1", "word2"), sep = " ")
+
+bigrams_filtered_CO <- bigrams_separated_CO %>%
+  filter(!word1 %in% stop_words$word) %>%
+  filter(!word2 %in% stop_words$word)
+
+# new bigram counts:
+bigram_counts_CO <- bigrams_filtered_CO %>% 
+  count(word1, word2, sort = TRUE)
+
+bigram_counts_CO
+```
+
+```{r}
+bigrams_united_CO <- bigrams_filtered_CO %>%
+  unite(bigram, word1, word2, sep = " ")
+bigrams_united_CO
+```
+
+```{r}
+
+```
+
